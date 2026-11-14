@@ -512,6 +512,21 @@
   (is (= "<blockquote><p> Foo <h2>bar</h2> baz </p></blockquote>"
          (entry-function "> Foo\n>## bar\n> baz"))))
 
+(deftest blockquote-after-list
+  (is (= "<ul><li>a</li><li>b</li></ul><blockquote><p> quote </p></blockquote><p>after</p>"
+         (entry-function "- a\n- b\n\n> quote\n\nafter"))))
+
+(deftest blockquote-without-blank-line-before
+  (is (= "<p>intro:</p><blockquote><p> quote </p></blockquote><p>after</p>"
+         (entry-function "intro:\n> quote\n\nafter"))))
+
+(deftest less-than-that-cannot-start-a-tag
+  (is (= "<p>Fat &lt;0.5g</p>" (entry-function "Fat <0.5g")))
+  (is (= "<p>children &lt; 3 years</p>" (entry-function "children < 3 years"))))
+
+(deftest html-comment
+  (is (= "<p>text <!-- note --> more</p>" (entry-function "text <!-- note --> more"))))
+
 (deftest escaped-characters
   (is
     (= "<p>&#94;&#42;&#96;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"

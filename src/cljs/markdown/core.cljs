@@ -16,7 +16,7 @@
               [line state]
               (or replacement-transformers
                   (into transformer-vector custom-transformers)))]
-        (.append html text)
+        (.push html text)
         new-state))))
 
 (defn format "Removed from cljs.core 0.0-1885, Ref. http://goo.gl/su7Xkj"
@@ -35,7 +35,9 @@
                                (partition 2)
                                (reduce (fn [m [k v]] (assoc m (keyword k) v)) {}))
           lines       (.split (str text "\n") #"\r?\n")
-          html        (goog.string.StringBuffer. "")
+          ;; a plain js array instead of goog.string.StringBuffer, so that the
+          ;; same code also compiles with squint, which has no Closure library
+          html        #js []
           references  (when (:reference-links? params) (parse-references lines))
           footnotes   (when (:footnotes? params) (parse-footnotes lines))
           [metadata lines] (if (:parse-meta? params) (parse-metadata lines) [nil lines])
@@ -60,8 +62,10 @@
             (recur more
                    (assoc (transformer html line (first more) (dissoc state :skip-next-line?))
                      :last-line-empty? (empty? (.trim line))))
-            (transformer (.append html (footer (:footnotes state))) line "" (assoc state :eof true)))))
-      {:metadata metadata :html (.toString html)})))
+            (do
+              (.push html (footer (:footnotes state)))
+              (transformer html line "" (assoc state :eof true))))))
+      {:metadata metadata :html (.join html "")})))
 
 (defn md->html [text & params]
   (:html (md-to-html-string* text params)))

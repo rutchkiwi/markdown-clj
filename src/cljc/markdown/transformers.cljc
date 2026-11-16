@@ -474,7 +474,9 @@
   (if (empty? (:processed footnotes))
     ""
     (->> (:processed footnotes)
-         (into (sorted-map))
+         ;; under squint the ids are js object keys, so strings: sorting them
+         ;; as they are would put "10" ahead of "2"
+         (sort-by #?(:squint (fn [[id]] (js/parseInt id)) :default first))
          (reduce
           (fn [footnotes [id label]]
             (str footnotes

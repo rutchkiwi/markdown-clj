@@ -1,6 +1,5 @@
 (ns markdown.common
-  (:require [clojure.string :as str]
-            [clojure.string :as string])
+  (:require [clojure.string :as string])
   #?(:clj (:import (java.net URLEncoder))))
 
 (def ^{:dynamic true} *substring*)
@@ -26,7 +25,9 @@
 (defn thaw-string
   "Recursively replaces the frozen strings in the output with the original text."
   [text state]
-  (if-let [matches (re-seq (re-pattern (str escape-delimiter "\\d+" escape-delimiter)) text)]
+  ;; seq, because under squint re-seq returns an empty (truthy) seq, not nil,
+  ;; when nothing matches
+  (if-let [matches (seq (re-seq (re-pattern (str escape-delimiter "\\d+" escape-delimiter)) text))]
     (recur
       (reduce
         (fn [s r]
@@ -170,10 +171,10 @@
    state])
 
 (defn heading-text [text]
-  (-> (clojure.string/replace text #"^([ ]+)?[#]+" "")
-      (clojure.string/replace #"[#]+$" "")
+  (-> (string/replace text #"^([ ]+)?[#]+" "")
+      (string/replace #"[#]+$" "")
       ;; Strip out Hugo style anchor links
-      (clojure.string/replace #"\{(#|id=)?.*\}$" "")
+      (string/replace #"\{(#|id=)?.*\}$" "")
       string/trim))
 
 (defn hugo-anchor

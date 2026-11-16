@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "compile:squint": "squint compile src/cljc/markdown/common.cljc src/cljc/markdown/links.cljc src/cljc/markdown/lists.cljc src/cljc/markdown/tables.cljc src/cljc/markdown/transformers.cljc src/cljs/markdown/core.cljs test/markdown/md_test.cljc",
+    "build:squint": "npm run compile:squint && esbuild src/js/markdown.mjs --bundle --minify --format=iife --outfile=target/generated-resources/js/markdown.js",
+    "test:squint": "npm run compile:squint && node test/markdown/squint_runner.mjs && node test/markdown/squint_file_test.mjs"
+  },
   "devDependencies": {
-    "nbb": "0.0.109"
+    "esbuild": "^0.28.2",
+    "nbb": "0.0.109",
+    "squint-cljs": "^0.16.214"
   }
 }

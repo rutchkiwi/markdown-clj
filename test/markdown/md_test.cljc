@@ -1,8 +1,15 @@
 (ns markdown.md-test
-  (:require #?(:cljs [goog.string])
+  (:require #?@(:squint [[clojure.string :as string]]
+                :cljs   [[goog.string]])
             [clojure.test :refer [deftest is]]
             [markdown.core :as markdown]
             [markdown.tables :as tables]))
+
+#?(:squint
+   ;; squint has no Google Closure library, so decode hex entities by hand
+   (defn unescape-entities [s]
+     (string/replace s #"&#x([0-9a-f]+);"
+                     (fn [[_ hex]] (js/String.fromCharCode (js/parseInt hex 16))))))
 
 (def entry-function
   #?(:clj markdown/md-to-html-string
@@ -652,15 +659,17 @@
   #?(:bb nil :org.babashka/nbb nil
      :default
      (is (= "<p><a href=\"mailto:abc@google.com\">abc@google.com</a></p>"
-            (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
-                :cljs goog.string/unescapeEntities)
+            (#?(:clj    org.apache.commons.lang.StringEscapeUtils/unescapeHtml
+                :squint unescape-entities
+                :cljs   goog.string/unescapeEntities)
              (entry-function "<abc@google.com>")))))
 
   #?(:bb nil :org.babashka/nbb nil
      :default
      (is (= "<p><a href=\"mailto:abc_def_ghi@google.com\">abc_def_ghi@google.com</a></p>"
-            (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
-                :cljs goog.string/unescapeEntities)
+            (#?(:clj    org.apache.commons.lang.StringEscapeUtils/unescapeHtml
+                :squint unescape-entities
+                :cljs   goog.string/unescapeEntities)
              (entry-function "<abc_def_ghi@google.com>"))))))
 
 (deftest ul-initial-indentation
